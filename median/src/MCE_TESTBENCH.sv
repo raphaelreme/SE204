@@ -12,10 +12,10 @@ initial
 begin
   for (int i=0; i<10; i++)
   begin
-    a = i;
-    b = 3 + i/2;
+    a = $random();
+    b = $random();
     #20;
-
+    if (max<a || max<b)
     $display("########\na : %d\nb : %d\nmax : %d\nmin : %d", a, b, max, min);
   end
 end
