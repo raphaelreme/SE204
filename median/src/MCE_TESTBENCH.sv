@@ -15,9 +15,14 @@ begin
     a = $random();
     b = $random();
     #20;
-    if (max<a || max<b)
-    $display("########\na : %d\nb : %d\nmax : %d\nmin : %d", a, b, max, min);
+    if (max<a || max<b || min>a || min>b)
+    begin
+      $display("Erreur :\na : %d\nb : %d\nmax : %d\nmin : %d", a, b, max, min);
+      $stop();
+    end
   end
+  $display("Aucune erreur durant la simulation");
+  $finish();
 end
 
 
