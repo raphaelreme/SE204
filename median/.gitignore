@@ -1,2 +1,5 @@
-simulation/
+simulation/*
 transcript
+
+!simulation/bogart_bruite.hex
+!simulation/bogart_filtre.pgm
