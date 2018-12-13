@@ -22,9 +22,6 @@ ack_read <= (wb_s.stb & ~wb_s.we) & ~ack_read;
 end
 
 
-
-
-
 //Bloc memoire.
 //Adresses sur des mots de 4*8bits (decalage de 2 par rapport wb_s.adr)
 wire [mem_adr_width-1:0] Addr;
@@ -43,20 +40,4 @@ begin
     wb_s.dat_sm <= mem[Addr];
   end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 endmodule
