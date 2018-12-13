@@ -29,7 +29,14 @@ assign Addr = wb_s.adr[mem_adr_width+1:2];
 
 logic [3:0][7:0] mem [0: 1 << mem_adr_width];
 
+logic burst;
+
 always_ff @(posedge wb_s.clk)
+if (wb_s.rst)
+begin
+burst <= 0;
+end
+else
 begin
   if (wb_s.stb)
   begin
@@ -37,7 +44,16 @@ begin
       for (int i=0; i<4; i++)
         if(wb_s.sel[i])
           mem[Addr][i] <= wb_s.dat_ms[8*(i+1)-1 -: 8];
-    wb_s.dat_sm <= mem[Addr];
+
+    if (~burst || wb_s.cti == 0 || wb_s.cti == 1 || ~wb_s.bte)
+      wb_s.dat_sm <= mem[Addr];
+    else
+    begin
+      //bte != 0 is not supported -> behave as if cti == 0
+      if (wb_s.cti == 0 || ~wb_s.bte)
+
+
+    end
   end
 end
 endmodule
