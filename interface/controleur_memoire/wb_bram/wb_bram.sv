@@ -24,7 +24,7 @@ assign wb_s.ack = ack_read | ack_write;
 wire [mem_adr_width-1:0] Addr;
 assign Addr = wb_s.adr[mem_adr_width+1:2];
 
-logic [3:0][7:0] mem [0: 1 << mem_adr_width];
+logic [3:0][7:0] mem [0: (1 << mem_adr_width) - 1];
 
 
 
@@ -32,6 +32,7 @@ always_ff @(posedge wb_s.clk)
 begin
   //bte != 0 is not supported -> behave as if cti == 0
   ack_read <= ~wb_s.rst & wb_s.stb & ~wb_s.we & (wb_s.cti == 1 || (wb_s.cti == 2 && (wb_s.bte == 0 || ~ack_read)) || (wb_s.cti == 0 && ~ack_read));
+  //ack_read <= ~wb_s.rst & wb_s.stb & ~wb_s.we & (wb_s.cti == 1 || wb_s.cti == 2 || (wb_s.cti == 0 && ~ack_read));
 
   if (wb_s.stb)
   begin
@@ -44,9 +45,10 @@ begin
     if (~ack_read || wb_s.cti == 0 || wb_s.cti == 1)
       wb_s.dat_sm <= mem[Addr];
     else
-      wb_s.dat_sm <= mem[Addr + 1];
-
-
+      if (Addr == 2047)
+        wb_s.dat_sm <= mem[0];
+      else
+        wb_s.dat_sm <= mem[(Addr + 1)];
   end
 end
 endmodule
