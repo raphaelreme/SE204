@@ -23,12 +23,8 @@ Top Top0(.*) ;
 always #10ns FPGA_CLK1_50 = ~FPGA_CLK1_50;
 
 initial begin
-  KEY[1] = 0;
   KEY[0] = 1;
-  #123ns;
-  KEY[1] = 1;
-  #5ns;
-  KEY[1] = 0;
+  #128ns;
   KEY[0] = 0;
   #128ns;
   KEY[0] = 1;
@@ -38,5 +34,6 @@ initial begin
   #4000ns;
   $stop();
 end
+
 
 endmodule

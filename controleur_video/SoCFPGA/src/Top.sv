@@ -73,24 +73,28 @@ assign wshb_if_sdram.bte = '0 ;
 //--------------------------
 //------- Code Eleves ------
 //--------------------------
-
-
 `ifdef SIMULATION
-  localparam hcmpt=5 ;
+  localparam hcmpt = 5;
+	localparam  hcmpt2 = 3;
 `else
-  localparam hcmpt=15 ;
+  localparam hcmpt=25;
+	localparam  hcmpt2 = 23;
 `endif
 
 
 assign LED[0] = KEY[0];
 
-//Max ~65000
-logic [hcmpt:0] compteur;
-logic rst;
-assign rst = KEY[1];
+always_comb begin
+	LED[7:4] = 0;
+end
 
-always_ff @(posedge sys_clk or posedge rst)
-if (rst)
+//=============
+//Led 1 a 1 Hz avec sys_clk
+//=============
+logic [hcmpt:0] compteur;
+
+always_ff @(posedge sys_clk or posedge sys_rst)
+if (sys_rst)
 begin
 	LED[1] <= 0;
 	compteur <= 0;
@@ -102,4 +106,37 @@ begin
 		LED[1] <= ~LED[1];
 end
 
+//===============
+//pixel reset
+//===============
+logic pixel_rst, _pixel_rst;
+always_ff @(posedge pixel_clk or posedge sys_rst)
+if (sys_rst)
+begin
+	_pixel_rst <= 1;
+	pixel_rst <= 1;
+end
+else
+begin
+	_pixel_rst <= 0;
+	pixel_rst <= _pixel_rst;
+end
+
+//=============
+//Led 2 a 1 Hz avec pixel_clk
+//=============
+logic [hcmpt2:0] compteur2;
+
+always_ff @(posedge pixel_clk or posedge pixel_rst)
+if (pixel_rst)
+begin
+	LED[2] <= 0;
+	compteur2 <= 0;
+end
+else
+begin
+	compteur2 <= compteur2 + 1;
+	if (compteur2 == 0)
+		LED[2] <= ~LED[2];
+end
 endmodule
