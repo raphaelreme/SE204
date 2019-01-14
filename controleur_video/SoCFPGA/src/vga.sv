@@ -55,7 +55,7 @@ begin
 end
 else
 begin
-  //needed to correctly synchronized the first line of each image.
+  //needed to correctly synchronized the first line of each image. Otherwise it's shifted from 1 pixel.
   inc_line = (pixel_cpt == HSUM + HDISP - 1);
 
   video_ifm.RGB <= {24{line_cpt%16 == 0 || pixel_cpt%16 == 0}};
