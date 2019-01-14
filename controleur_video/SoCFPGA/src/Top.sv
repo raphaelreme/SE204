@@ -7,8 +7,12 @@ module Top (
 	output logic [7:0]	LED,
 	input  wire	 [3:0]	SW,
     // Les signaux du support matériel sont regroupés dans une interface
-    hws_if.master       hws_ifm
+    hws_if.master       hws_ifm,
+		video_if.master 		video_ifm
 );
+
+parameter HDISP = 800;
+parameter VDISP = 480;
 
 //====================================
 //  Déclarations des signaux internes
@@ -139,4 +143,14 @@ begin
 	if (compteur2 == 0)
 		LED[2] <= ~LED[2];
 end
+
+//===============
+//Interface video
+//===============
+video_if video_if_inst();
+
+vga #(.HDISP(HDISP), .VDISP(VDISP)) vga_inst(.pixel_clk(pixel_clk), .pixel_rst(pixel_rst), .video_ifm(video_ifm));
+
+
+
 endmodule
