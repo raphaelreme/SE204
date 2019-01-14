@@ -17,9 +17,9 @@ hws_if      hws_ifm();
 video_if video_if0();
 
 // Instance du module Top
-Top #(.HDISP(160), .VDISP(90)) Top0(.*, .video_ifm(video_if0.master));
+Top #(.HDISP(161), .VDISP(90)) Top0(.*, .video_ifm(video_if0.master));
 
- screen #(.mode(13),.X(160),.Y(90)) screen0(.video_ifs(video_if0));
+ screen #(.mode(13),.X(161),.Y(90)) screen0(.video_ifs(video_if0));
 
 ///////////////////////////////
 //  Code élèves
@@ -36,7 +36,7 @@ initial begin
 end
 
 initial begin
-  #1s;
+  #10000000ns;
   $stop();
 end
 
