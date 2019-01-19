@@ -22,27 +22,32 @@ localparam HSUM = HFP + HPULSE + HBP;
 //Lecture de la ram et envoie sur la fifo
 //========================================
 logic [$clog2(HDISP * VDISP)-1:0] pixel_id;
-logic read, write;
-
+logic [31:0] rdata;
+logic read, write, wfull;
 
 async_fifo #(.DATA_WIDTH(32)) async_fifo_inst( .rst(wshb_ifm.rst), .rclk(pixel_clk),
                                                   .read(read), .wclk(wshb_ifm.clk),
-                                                  .wdata(wshb_ifm.dat_sm), .write(write));
+                                                  .wdata(wshb_ifm.dat_sm), .write(write),
+                                                  .wfull(wfull), .rdata(rdata));
+
+
 
 // Demande du bus toujours active
 assign wshb_ifm.cyc = ~wshb_ifm.rst;
 assign wshb_ifm.stb = ~wshb_ifm.rst;
 
-// Lire en mode classique (En fait il s'avere que dans le code du slave, il fait du burst quand meme !)
+// Lire en mode classique (En fait il s'avere que dans le code du slave, il fait du burst quand meme en simu)
 // En verite cela fera au maximum 8 cycle de lectures d'affiles tant que la fifo n'est pas pleine.
 assign wshb_ifm.we = 1'b0;
 assign wshb_ifm.cti = 3'b000;
 assign wshb_ifm.bte = 2'b00;
 
-// Lecture sur des mots de 32 bits
-assign wshb_ifm.adr = pixel_id<<2;
+// Lecture sur des mots de 32 bits donc decalage de 2.
+// Mais en plus, pour arreter le burst du slave en simu,
+// il faut imperativement changer l'adresse... C'est fonctionnel en utilisant cette astuce.
+assign wshb_ifm.adr = wfull? 1<<31 : pixel_id<<2;
 
-assign write = wshb_ifm.ack && ~async_fifo_inst.wfull;
+assign write = wshb_ifm.ack && ~wfull;
 
 // Generation de pixel_id pour l'adresse
 always_ff @(posedge wshb_ifm.clk or posedge wshb_ifm.rst)
@@ -53,7 +58,7 @@ end
 else
 begin
   //ecriture dans la file si non pleine.
-  if (wshb_ifm.ack && ~async_fifo_inst.wfull)
+  if (wshb_ifm.ack && ~wfull)
   begin
     if (pixel_id == HDISP*VDISP - 1)
     begin
@@ -74,18 +79,22 @@ begin
 end
 else
 begin
-  _wfull <= async_fifo_inst.wfull;
+  _wfull <= wfull;
   wfull_sync <= _wfull;
 end
 
-//Garde en memoire si le file a ete full une fois
+//Garde en memoire si le file a ete pleine une fois
 logic was_full;
-always_ff @(posedge pixel_clk or posedge pixel_clk)
+always_ff @(posedge pixel_clk or posedge pixel_rst)
 if (pixel_rst)
   was_full <= 0;
 else
+begin
   if (wfull_sync)
     was_full <= 1;
+  else
+    was_full <= was_full;
+end
 
 
 
@@ -109,7 +118,6 @@ begin
 end
 else
 begin
-
   // On ne commence qu'une fois la fifo remplie une 1ere fois
   if (was_full)
   begin
@@ -121,7 +129,6 @@ begin
         line_cpt <= 0;
       else
         line_cpt <= line_cpt + 1;
-
     end
     else
       pixel_cpt <= pixel_cpt + 1;
@@ -135,7 +142,7 @@ end
  */
 logic inc_line;
 
-assign video_ifm.RGB = async_fifo_inst.rdata[23:0];
+assign video_ifm.RGB = rdata[23:0];
 assign read = video_ifm.BLANK;
 
 
