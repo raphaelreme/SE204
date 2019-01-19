@@ -31,7 +31,6 @@ async_fifo #(.DATA_WIDTH(32)) async_fifo_inst( .rst(wshb_ifm.rst), .rclk(pixel_c
                                                   .wfull(wfull), .rdata(rdata));
 
 
-
 // Demande du bus toujours active
 assign wshb_ifm.cyc = ~wshb_ifm.rst;
 assign wshb_ifm.stb = ~wshb_ifm.rst;
@@ -39,8 +38,8 @@ assign wshb_ifm.stb = ~wshb_ifm.rst;
 // Lire en mode classique (En fait il s'avere que dans le code du slave, il fait du burst quand meme en simu)
 // En verite cela fera au maximum 8 cycle de lectures d'affiles tant que la fifo n'est pas pleine.
 assign wshb_ifm.we = 1'b0;
-assign wshb_ifm.cti = 3'b000;
-assign wshb_ifm.bte = 2'b00;
+assign wshb_ifm.cti = 3'b0;
+assign wshb_ifm.bte = 2'b0;
 
 // Lecture sur des mots de 32 bits donc decalage de 2.
 // Mais en plus, pour arreter le burst du slave en simu,
@@ -161,9 +160,6 @@ begin
   video_ifm.HS <= pixel_cpt < HFP - 1 || pixel_cpt >= HFP + HPULSE - 1;
   video_ifm.VS <= line_cpt + inc_line < VFP || line_cpt + inc_line >= VFP + VPULSE;
   video_ifm.BLANK <= ~(inc_line || line_cpt < VSUM || pixel_cpt < HSUM - 1|| line_cpt + inc_line == VSUM + VDISP);
-
 end
-
-
 
 endmodule
