@@ -155,6 +155,7 @@ begin
 end
 else
 begin
+  //Permet de synchroniser correctement les signaux sur le 0 des compteurs.
   inc_line = (pixel_cpt == HSUM + HDISP - 1);
 
   video_ifm.HS <= pixel_cpt < HFP - 1 || pixel_cpt >= HFP + HPULSE - 1;
