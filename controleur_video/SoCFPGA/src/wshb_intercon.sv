@@ -37,8 +37,8 @@ assign wshb_ifs_mire.err = ~jeton ? wshb_ifm_sdram.err : 0;
 
 
 
-// Gestion du jeton. Initialement, la mire a le jeton. (Arbitraire)
-always @(posedge clk or posedge rst)
+// Gestion du jeton. Initialement, la mire a le jeton.
+always @(posedge clk or posedge rst)
 if (rst)
 begin
   jeton = 0;
@@ -47,9 +47,9 @@ else
 begin
   // On ne change le jeton que si celui qui l'a n'en veut plus et l'autre le veut.
   if (jeton)
-    jeton <= wshb_if_vga.cyc || ~wshb_if_mire.cyc;
+    jeton <= wshb_ifs_vga.cyc || ~wshb_ifs_mire.cyc;
   else
-    jeton <= wshb_if_vga.cyc & ~wshb_if_mire.cyc;
+    jeton <= wshb_ifs_vga.cyc & ~wshb_ifs_mire.cyc;
 end
 
 

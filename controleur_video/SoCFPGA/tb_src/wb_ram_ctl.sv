@@ -1,6 +1,6 @@
 
-// October 2018 
-// @brief : wishbone ram controller using latency and burst mode for read operations 
+// October 2018
+// @brief : wishbone ram controller using latency and burst mode for read operations
 `default_nettype none
  module wb_ram_ctl
  #(
@@ -42,7 +42,7 @@ ram_inst
     .addr (s_addr),
     .wdata(wshb_ifs.dat_ms),
     .Be   (wshb_ifs.sel),
-    .we   (wshb_ifs.cyc && wshb_ifs.stb && wshb_ifs.we),
+    .we   ((r_state == IDLE) && wshb_ifs.cyc && wshb_ifs.stb && wshb_ifs.we),
     .rdata(wshb_ifs.dat_sm)
 );
 
@@ -82,7 +82,7 @@ always_ff @(posedge wshb_ifs.clk)
                       r_ack <= 1'b0;
                   end
               end
-          
+
            READ:
            begin
                if (r_burst_cnt == 3'b111)
@@ -96,7 +96,7 @@ always_ff @(posedge wshb_ifs.clk)
                    begin
                        r_ack       <= 1'b1;
                        r_addr      <= r_addr + 1'b1;
-                       r_burst_cnt <= r_burst_cnt + 1'b1; 
+                       r_burst_cnt <= r_burst_cnt + 1'b1;
                    end
                    else
                    begin
@@ -105,6 +105,6 @@ always_ff @(posedge wshb_ifs.clk)
                    end
                end;
            end
-      endcase  
- 
+      endcase
+
 endmodule

@@ -19,7 +19,7 @@ localparam HSUM = HFP + HPULSE + HBP;
 
 
 //========================================
-//Lecture de la ram et envoie sur la fifo
+// Lecture de la ram et envoie sur la fifo
 //========================================
 logic [$clog2(HDISP * VDISP)-1:0] pixel_id;
 logic [31:0] rdata;
@@ -32,8 +32,8 @@ async_fifo #(.DATA_WIDTH(32)) async_fifo_inst( .rst(wshb_ifm.rst), .rclk(pixel_c
 
 
 // Demande du bus toujours active
-assign wshb_ifm.cyc = ~wshb_ifm.rst;
-assign wshb_ifm.stb = ~wshb_ifm.rst;
+assign wshb_ifm.cyc = ~wshb_ifm.rst && ~wfull;
+assign wshb_ifm.stb = ~wshb_ifm.rst && ~wfull;
 
 // Lire en mode classique (En fait il s'avere que dans le code du slave, il fait du burst quand meme en simu)
 // En verite cela fera au maximum 8 cycle de lectures d'affiles tant que la fifo n'est pas pleine.
@@ -56,7 +56,7 @@ begin
 end
 else
 begin
-  //ecriture dans la file si non pleine.
+  // Ecriture dans la file si non pleine.
   if (wshb_ifm.ack && ~wfull)
   begin
     if (pixel_id == HDISP*VDISP - 1)
@@ -68,7 +68,7 @@ begin
   end
 end
 
-//Synchronisation de wfull et pixel_clk
+// Synchronisation de wfull et pixel_clk
 logic _wfull, wfull_sync;
 always_ff @(posedge pixel_clk or posedge pixel_rst)
 if (pixel_rst)
@@ -82,7 +82,7 @@ begin
   wfull_sync <= _wfull;
 end
 
-//Garde en memoire si le file a ete pleine une fois
+// Garde en memoire si le file a ete pleine une fois
 logic was_full;
 always_ff @(posedge pixel_clk or posedge pixel_rst)
 if (pixel_rst)
@@ -98,7 +98,7 @@ end
 
 
 //================================================
-//Lecture de la fifo et envoie vers le flux video
+// Lecture de la fifo et envoie vers le flux video
 //================================================
 
 assign video_ifm.CLK = pixel_clk;

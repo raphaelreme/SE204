@@ -138,7 +138,8 @@ video_if video_if_inst();
 // Modules perso
 //==============
 
-mire mire_inst(.wshb_ifm(wshb_if_mire.master));
+mire #(.HDISP(HDISP), .VDISP(VDISP))
+    mire_inst(.wshb_ifm(wshb_if_mire.master));
 
 vga #(.HDISP(HDISP), .VDISP(VDISP))
 		vga_inst( .pixel_clk(pixel_clk), .pixel_rst(pixel_rst),
@@ -147,7 +148,7 @@ vga #(.HDISP(HDISP), .VDISP(VDISP))
 
 wshb_intercon wshb_intercon_inst( .wshb_ifm_sdram(wshb_if_sdram.master),
 																  .wshb_ifs_vga(wshb_if_vga.slave),
-																  .wshb_ifs_mire(wshb_if_vga.slave)
+																  .wshb_ifs_mire(wshb_if_mire.slave)
 																);
 
 

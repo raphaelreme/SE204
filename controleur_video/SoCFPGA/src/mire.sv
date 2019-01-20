@@ -3,7 +3,7 @@
   );
 
 parameter HDISP = 800;
-parameter VDISP = 480
+parameter VDISP = 480;
 
 logic [$clog2(HDISP)-1:0] pixel_cpt;
 logic [$clog2(VDISP)-1:0] line_cpt;
@@ -25,31 +25,30 @@ begin
     begin
       pixel_cpt <= 0;
 
-      if (line_cpt == VSUM + VDISP - 1)
+      if (line_cpt == VDISP - 1)
         line_cpt <= 0;
       else
         line_cpt <= line_cpt + 1;
     end
     else
       pixel_cpt <= pixel_cpt + 1;
-    end
   end
 end
 
+// Generations des signaux du wishbone.
 always_ff @(posedge wshb_ifm.clk or posedge wshb_ifm.rst)
 if (wshb_ifm.rst)
-begin
-  wshb_ifm.cyc <= 0;
-  wshb_ifm.adr <= 0;
-  wshb_ifm.dat_ms <= 32'b0;
-end
+  wshb_ifm.cyc <= 1;
 else
-begin
-  wshb_ifm.dat_ms <= (pixel_cpt%16 == 0 || line_cpt%16 == 0) ? 32'hffffff : 32'h0;
-  wshb_ifm.adr <= line_cpt * HDISP + pixel_cpt;
-end
+  wshb_ifm.cyc <= ~(pixel_cpt % 64 == 0);
 
-assign wshb_ifm.adr = ();
+// En reset on ne demande pas d'ecriture en memoire, stb = 0 => Ack = 0.
+assign wshb_ifm.stb = wshb_ifm.cyc && ~wshb_ifm.rst;
+
+assign wshb_ifm.adr = (line_cpt * HDISP + pixel_cpt) * 4;
+assign wshb_ifm.dat_ms = (pixel_cpt%16 == 0 || line_cpt%16 == 0) ? 32'hffffff : 32'h0;
+
+
 assign wshb_ifm.we = 1'b1;
 assign wshb_ifm.sel = 4'b1111;
 assign wshb_ifm.cti = 3'b0;
