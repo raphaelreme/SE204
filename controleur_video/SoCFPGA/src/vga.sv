@@ -3,6 +3,7 @@
   input logic pixel_rst,
   video_if.master video_ifm,
   wshb_if.master wshb_ifm
+
   );
 
 parameter HDISP = 800; //width
@@ -32,8 +33,8 @@ async_fifo #(.DATA_WIDTH(32)) async_fifo_inst( .rst(wshb_ifm.rst), .rclk(pixel_c
 
 
 // Demande du bus toujours active
-assign wshb_ifm.cyc = ~wshb_ifm.rst && ~wfull;
-assign wshb_ifm.stb = ~wshb_ifm.rst && ~wfull;
+assign wshb_ifm.cyc = ~wfull;
+assign wshb_ifm.stb = ~wfull;
 
 // Lire en mode classique (En fait il s'avere qu'il fait du burst quand meme)
 assign wshb_ifm.we = 1'b0;
