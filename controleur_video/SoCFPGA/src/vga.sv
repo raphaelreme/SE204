@@ -35,18 +35,15 @@ async_fifo #(.DATA_WIDTH(32)) async_fifo_inst( .rst(wshb_ifm.rst), .rclk(pixel_c
 assign wshb_ifm.cyc = ~wshb_ifm.rst && ~wfull;
 assign wshb_ifm.stb = ~wshb_ifm.rst && ~wfull;
 
-// Lire en mode classique (En fait il s'avere que dans le code du slave, il fait du burst quand meme en simu)
-// En verite cela fera au maximum 8 cycle de lectures d'affiles tant que la fifo n'est pas pleine.
+// Lire en mode classique (En fait il s'avere qu'il fait du burst quand meme)
 assign wshb_ifm.we = 1'b0;
 assign wshb_ifm.cti = 3'b0;
 assign wshb_ifm.bte = 2'b0;
 
 // Lecture sur des mots de 32 bits donc decalage de 2.
-// Mais en plus, pour arreter le burst du slave en simu,
-// il faut imperativement changer l'adresse... C'est fonctionnel en utilisant cette astuce.
-assign wshb_ifm.adr = wfull? 1<<31 : pixel_id<<2;
+assign wshb_ifm.adr = pixel_id<<2;
 
-assign write = wshb_ifm.ack && ~wfull;
+assign write = wshb_ifm.ack;
 
 // Generation de pixel_id pour l'adresse
 always_ff @(posedge wshb_ifm.clk or posedge wshb_ifm.rst)
@@ -56,8 +53,7 @@ begin
 end
 else
 begin
-  // Ecriture dans la file si non pleine.
-  if (wshb_ifm.ack && ~wfull)
+  if (wshb_ifm.ack)
   begin
     if (pixel_id == HDISP*VDISP - 1)
     begin
@@ -67,6 +63,11 @@ begin
       pixel_id <= pixel_id + 1;
   end
 end
+
+
+//================================================
+// Lecture de la fifo et envoie vers le flux video
+//================================================
 
 // Synchronisation de wfull et pixel_clk
 logic _wfull, wfull_sync;
@@ -97,9 +98,7 @@ end
 
 
 
-//================================================
-// Lecture de la fifo et envoie vers le flux video
-//================================================
+
 
 assign video_ifm.CLK = pixel_clk;
 
