@@ -6,11 +6,6 @@ module wshb_intercon (
  wshb_if.master wshb_ifm_sdram
  );
 
-
-logic clk, rst;
-assign clk = wshb_ifm_sdram.clk;
-assign rst = wshb_ifm_sdram.rst;
-
 // Vaut 1 si vga a la main, 0 si c'est la mire.
 logic jeton;
 
@@ -38,8 +33,8 @@ assign wshb_ifs_mire.err = ~jeton ? wshb_ifm_sdram.err : 0;
 
 
 // Gestion du jeton. Initialement, la mire a le jeton.
-always @(posedge clk or posedge rst)
-if (rst)
+always @(posedge wshb_ifm_sdram.clk or posedge wshb_ifm_sdram.rst)
+if (wshb_ifm_sdram.rst)
 begin
   jeton <= 0;
 end
