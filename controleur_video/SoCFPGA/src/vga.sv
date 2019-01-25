@@ -35,13 +35,12 @@ async_fifo #(.DATA_WIDTH(32), .ALMOST_FULL_THRESHOLD(224))
 
 
 // Demande le bus tant que la file n'est pas pleine
-/*always_ff @(posedge wshb_ifm.clk)
+always_ff @(posedge wshb_ifm.clk)
 if (wshb_ifm.cyc)
   wshb_ifm.cyc <= ~wfull;
 else
-  wshb_ifm.cyc <= ~almost_full;*/
+  wshb_ifm.cyc <= ~almost_full;
 
-assign wshb_ifm.cyc = ~wfull;
 assign wshb_ifm.stb = ~wfull;
 
 // Lire en mode classique (En fait il s'avere qu'il fait du burst quand meme)
