@@ -51,10 +51,10 @@ begin
   wshb_ifm.stb <= ~(pixel_cpt % 64 == 0);
 
   //On utilise l'ack pour savoir si l'adresse doit etre incrementer.
-  wshb_ifm.adr = (line_cpt * HDISP + pixel_cpt + wshb_ifm.ack) * 4;
+  wshb_ifm.adr <= (line_cpt * HDISP + pixel_cpt + wshb_ifm.ack) * 4;
 
   // On utilise le fait que HDISP est multiple de 16, pour passer la premiere colonne de la bonne couleur.
-  wshb_ifm.dat_ms = ((pixel_cpt + wshb_ifm.ack)%16 == 0 || line_cpt%16 == 0) ? 32'hffffffff : 32'h0;
+  wshb_ifm.dat_ms <= ((pixel_cpt + wshb_ifm.ack)%16 == 0 || line_cpt%16 == 0) ? 32'hffffffff : 32'h0;
 end
 
 assign wshb_ifm.we = 1'b1;

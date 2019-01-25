@@ -57,10 +57,10 @@ hw_support hw_support_inst (
 // du flux video pour l'instant
 // A SUPPRIMER PLUS TARD
 //=============================
-assign wshb_if_stream.ack = 1'b1;
-assign wshb_if_stream.dat_sm = '0 ;
-assign wshb_if_stream.err =  1'b0 ;
-assign wshb_if_stream.rty =  1'b0 ;
+//assign wshb_if_stream.ack = 1'b1;
+//assign wshb_if_stream.dat_sm = '0 ;
+//assign wshb_if_stream.err =  1'b0 ;
+//assign wshb_if_stream.rty =  1'b0 ;
 
 //--------------------------
 //------- Code Eleves ------

@@ -24,15 +24,23 @@ localparam HSUM = HFP + HPULSE + HBP;
 //========================================
 logic [$clog2(HDISP * VDISP)-1:0] pixel_id;
 logic [31:0] rdata;
-logic read, write, wfull;
+logic read, write, wfull, almost_full;
 
-async_fifo #(.DATA_WIDTH(32)) async_fifo_inst( .rst(wshb_ifm.rst), .rclk(pixel_clk),
-                                                  .read(read), .wclk(wshb_ifm.clk),
-                                                  .wdata(wshb_ifm.dat_sm), .write(write),
-                                                  .wfull(wfull), .rdata(rdata));
+async_fifo #(.DATA_WIDTH(32), .ALMOST_FULL_THRESHOLD(224))
+                         async_fifo_inst( .rst(wshb_ifm.rst), .rclk(pixel_clk),
+                                          .read(read), .wclk(wshb_ifm.clk),
+                                          .wdata(wshb_ifm.dat_sm), .write(write),
+                                          .wfull(wfull), .rdata(rdata),
+                                          .walmost_full(almost_full));
 
 
-// Demande du bus toujours active
+// Demande le bus tant que la file n'est pas pleine
+/*always_ff @(posedge wshb_ifm.clk)
+if (wshb_ifm.cyc)
+  wshb_ifm.cyc <= ~wfull;
+else
+  wshb_ifm.cyc <= ~almost_full;*/
+
 assign wshb_ifm.cyc = ~wfull;
 assign wshb_ifm.stb = ~wfull;
 
@@ -139,7 +147,10 @@ end
 /*
  * Envoie de l'image
  */
-logic inc_line;
+
+// Permet de synchroniser correctement les signaux sur le 0 des compteurs.
+wire inc_line;
+assign inc_line = (pixel_cpt == HSUM + HDISP - 1);
 
 assign video_ifm.RGB = rdata[23:0];
 assign read = video_ifm.BLANK;
@@ -154,9 +165,6 @@ begin
 end
 else
 begin
-  //Permet de synchroniser correctement les signaux sur le 0 des compteurs.
-  inc_line = (pixel_cpt == HSUM + HDISP - 1);
-
   video_ifm.HS <= pixel_cpt < HFP - 1 || pixel_cpt >= HFP + HPULSE - 1;
   video_ifm.VS <= line_cpt + inc_line < VFP || line_cpt + inc_line >= VFP + VPULSE;
   video_ifm.BLANK <= ~(inc_line || line_cpt < VSUM || pixel_cpt < HSUM - 1|| line_cpt + inc_line == VSUM + VDISP);

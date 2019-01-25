@@ -41,7 +41,7 @@ assign wshb_ifs_mire.err = ~jeton ? wshb_ifm_sdram.err : 0;
 always @(posedge clk or posedge rst)
 if (rst)
 begin
-  jeton = 0;
+  jeton <= 0;
 end
 else
 begin
